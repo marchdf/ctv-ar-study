@@ -1,0 +1,9 @@
+.DS_Store
+*.log
+*.dat
+*.o*
+__pycache__
+*.pdf
+results*
+*.exo
+naluX

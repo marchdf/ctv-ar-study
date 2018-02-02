@@ -17,11 +17,18 @@ import subprocess as sp
 # Setup
 #
 # ========================================================================
-delta = 1
-L = [2.0,2.0]
-N = [200,200]
+aspect_ratio = 1
 
-dbname = 'plate_{0:d}x{1:d}'.format(N[0], N[1])
+Ny = 1024
+Ly = 2
+dy = Ly / Ny
+Nx = int(Ny / aspect_ratio)
+dx = Ly / Nx
+
+L = [Ly, Ly, dy]
+N = [Nx, Ny, 1]
+
+dbname = 'mesh_{0:d}x{1:d}'.format(N[0], N[1])
 msh_dbname = dbname + ".exo"
 
 # Get executables
@@ -50,10 +57,6 @@ msh_iname = "mesh.yaml"
 msh_inp = yaml.load(open(msh_iname, 'r'))
 msh_data = msh_inp['nalu_abl_mesh']
 
-ndtw_iname = "ic.yaml"
-ndtw_inp = yaml.load(open(ndtw_iname, 'r'))
-ndtw_data = ndtw_inp['nalu_preprocess']
-
 # New yaml mesh file
 msh_oname = "msh_tmp.yaml"
 msh_data['output_db'] = msh_dbname
@@ -62,8 +65,6 @@ vertices[1][0] = L[0]
 vertices[1][1] = L[1]
 vertices[1][2] = L[2]
 msh_data['mesh_dimensions'] = N
-y_spacing = msh_data['y_spacing']
-y_spacing['stretching_factor'] = factor
 
 with open(msh_oname, 'w') as of:
     yaml.dump(msh_inp, of, default_flow_style=False)

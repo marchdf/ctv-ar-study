@@ -25,13 +25,13 @@ linear_solvers:
     max_iterations: 75
     kspace: 75
     output_level: 0
-    muelu_xml_file_name: ../muelu.xml
+    muelu_xml_file_name: ../../muelu.xml
     recompute_preconditioner: no
 
 realms:
 
   - name: realm_1
-    mesh: ctv_ref_r0.g
+    mesh: ../../mesh/mesh_32x1024.exo
     use_edges: yes
     automatic_decomposition_type: rib
 
@@ -53,19 +53,13 @@ realms:
     initial_conditions:
 
       - user_function: ic_1
-        target_name: 
-          - fluid_part
-          - fluid_part.Pyramid_5._urpconv
-          - fluid_part.Tetrahedron_4._urpconv
+        target_name: interior
         user_function_name:
          velocity: convecting_taylor_vortex
          pressure: convecting_taylor_vortex
 
     material_properties:
-      target_name: 
-        - fluid_part
-        - fluid_part.Pyramid_5._urpconv
-        - fluid_part.Tetrahedron_4._urpconv
+      target_name: interior
 
       specifications:
         - name: density
@@ -95,7 +89,7 @@ realms:
       symmetry_user_data:
 
     - symmetry_boundary_condition: bc2
-      target_name: terrain
+      target_name: bottom
       symmetry_user_data:
 
 
@@ -116,8 +110,8 @@ realms:
             pressure: no
 
     output:
-      output_data_base_name: out/ctv.e
-      output_frequency: 10
+      output_data_base_name: results/ctv.e
+      output_frequency: 1000
       output_node_set: no 
       output_variables:
        - dual_nodal_volume
@@ -139,7 +133,7 @@ Time_Integrators:
       name: ti_1
       start_time: 0
       termination_time: 1.0
-      time_step: 0.005
+      time_step: 0.00048828125
       time_stepping_type: fixed 
       time_step_count: 0
       second_order_accuracy: yes
