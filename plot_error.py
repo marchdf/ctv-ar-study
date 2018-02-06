@@ -72,8 +72,8 @@ if __name__ == '__main__':
 
     # ======================================================================
     # Load the data
-    methods = ['edge']
-    aspects = [1, 2]
+    methods = ['edge', 'cvfem']
+    aspects = [1, 2, 4, 8, 16, 32, 64, 128]
 
     edf = []
     for i, method in enumerate(methods):
@@ -120,6 +120,36 @@ if __name__ == '__main__':
                        ms=10,
                        label=method)
 
+    plt.figure(2)
+    for i, method in enumerate(methods):
+        subdf = edf[(edf.Time == 1.0) &
+                    (edf.Field == 'dpdx') &
+                    (edf.Method == method)]
+        p = plt.loglog(subdf.Aspect,
+                       subdf.L2,
+                       lw=2,
+                       color=cmap[i],
+                       marker=markertype[i],
+                       mec=cmap[i],
+                       mfc=cmap[i],
+                       ms=10,
+                       label=method)
+
+    plt.figure(3)
+    for i, method in enumerate(methods):
+        subdf = edf[(edf.Time == 1.0) &
+                    (edf.Field == 'dpdy') &
+                    (edf.Method == method)]
+        p = plt.loglog(subdf.Aspect,
+                       subdf.L2,
+                       lw=2,
+                       color=cmap[i],
+                       marker=markertype[i],
+                       mec=cmap[i],
+                       mfc=cmap[i],
+                       ms=10,
+                       label=method)
+
     # Format plots
     plt.figure(0)
     ax = plt.gca()
@@ -128,6 +158,7 @@ if __name__ == '__main__':
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
     legend = ax.legend(loc='best')
+    ax.set_ylim([1e-6,1e0])
     plt.tight_layout()
     plt.savefig('u_norm.png', format='png')
 
@@ -138,5 +169,28 @@ if __name__ == '__main__':
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
     legend = ax.legend(loc='best')
+    ax.set_ylim([1e-6,1e0])
     plt.tight_layout()
     plt.savefig('v_norm.png', format='png')
+
+    plt.figure(2)
+    ax = plt.gca()
+    plt.xlabel(r"aspect ratio", fontsize=22, fontweight='bold')
+    plt.ylabel(r"$L_2\left(\frac{dp}{dx}\right)$", fontsize=22, fontweight='bold')
+    plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
+    plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
+    legend = ax.legend(loc='best')
+    ax.set_ylim([1e-6,1e0])
+    plt.tight_layout()
+    plt.savefig('dpdx_norm.png', format='png')
+
+    plt.figure(3)
+    ax = plt.gca()
+    plt.xlabel(r"aspect ratio", fontsize=22, fontweight='bold')
+    plt.ylabel(r"$L_2\left(\frac{dp}{dy}\right)$", fontsize=22, fontweight='bold')
+    plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
+    plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
+    legend = ax.legend(loc='best')
+    ax.set_ylim([1e-6,1e0])
+    plt.tight_layout()
+    plt.savefig('dpdy_norm.png', format='png')
