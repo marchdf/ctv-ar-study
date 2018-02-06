@@ -87,68 +87,32 @@ if __name__ == '__main__':
             edf.append(df)
 
     edf = pd.concat(edf)
+    edf['theory'] = edf.Aspect**2 * 1e-5
 
     # ======================================================================
     # Plot
-    plt.figure(0)
-    for i, method in enumerate(methods):
-        subdf = edf[(edf.Time == 1.0) &
-                    (edf.Field == 'u') &
-                    (edf.Method == method)]
-        p = plt.loglog(subdf.Aspect,
-                       subdf.L2,
-                       lw=2,
-                       color=cmap[i],
-                       marker=markertype[i],
-                       mec=cmap[i],
-                       mfc=cmap[i],
-                       ms=10,
-                       label=method)
-
-    plt.figure(1)
-    for i, method in enumerate(methods):
-        subdf = edf[(edf.Time == 1.0) &
-                    (edf.Field == 'v') &
-                    (edf.Method == method)]
-        p = plt.loglog(subdf.Aspect,
-                       subdf.L2,
-                       lw=2,
-                       color=cmap[i],
-                       marker=markertype[i],
-                       mec=cmap[i],
-                       mfc=cmap[i],
-                       ms=10,
-                       label=method)
-
-    plt.figure(2)
-    for i, method in enumerate(methods):
-        subdf = edf[(edf.Time == 1.0) &
-                    (edf.Field == 'dpdx') &
-                    (edf.Method == method)]
-        p = plt.loglog(subdf.Aspect,
-                       subdf.L2,
-                       lw=2,
-                       color=cmap[i],
-                       marker=markertype[i],
-                       mec=cmap[i],
-                       mfc=cmap[i],
-                       ms=10,
-                       label=method)
-
-    plt.figure(3)
-    for i, method in enumerate(methods):
-        subdf = edf[(edf.Time == 1.0) &
-                    (edf.Field == 'dpdy') &
-                    (edf.Method == method)]
-        p = plt.loglog(subdf.Aspect,
-                       subdf.L2,
-                       lw=2,
-                       color=cmap[i],
-                       marker=markertype[i],
-                       mec=cmap[i],
-                       mfc=cmap[i],
-                       ms=10,
-                       label=method)
+    fields = ['u', 'v', 'dpdx', 'dpdy']
+    for i, field in enumerate(fields):
+        for j, method in enumerate(methods):
+            plt.figure(i)
+            subdf = edf[(edf.Time == 1.0) &
+                        (edf.Field == field) &
+                        (edf.Method == method)]
+            p = plt.loglog(subdf.Aspect,
+                           subdf.L2,
+                           lw=2,
+                           color=cmap[j],
+                           marker=markertype[j],
+                           mec=cmap[j],
+                           mfc=cmap[j],
+                           ms=10,
+                           label=method)
+            if j == 0:
+                p = plt.loglog(subdf.Aspect,
+                               subdf.theory,
+                               lw=2,
+                               color=cmap[-1],
+                               label='2nd order')
 
     # Format plots
     plt.figure(0)
@@ -158,7 +122,7 @@ if __name__ == '__main__':
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
     legend = ax.legend(loc='best')
-    ax.set_ylim([1e-6,1e0])
+    #ax.set_ylim([1e-6, 1e0])
     plt.tight_layout()
     plt.savefig('u_norm.png', format='png')
 
@@ -169,28 +133,30 @@ if __name__ == '__main__':
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
     legend = ax.legend(loc='best')
-    ax.set_ylim([1e-6,1e0])
+    ax.set_ylim([1e-6, 1e0])
     plt.tight_layout()
     plt.savefig('v_norm.png', format='png')
 
     plt.figure(2)
     ax = plt.gca()
     plt.xlabel(r"aspect ratio", fontsize=22, fontweight='bold')
-    plt.ylabel(r"$L_2\left(\frac{dp}{dx}\right)$", fontsize=22, fontweight='bold')
+    plt.ylabel(r"$L_2\left(\frac{dp}{dx}\right)$",
+               fontsize=22, fontweight='bold')
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
     legend = ax.legend(loc='best')
-    ax.set_ylim([1e-6,1e0])
+    ax.set_ylim([1e-6, 1e0])
     plt.tight_layout()
     plt.savefig('dpdx_norm.png', format='png')
 
     plt.figure(3)
     ax = plt.gca()
     plt.xlabel(r"aspect ratio", fontsize=22, fontweight='bold')
-    plt.ylabel(r"$L_2\left(\frac{dp}{dy}\right)$", fontsize=22, fontweight='bold')
+    plt.ylabel(r"$L_2\left(\frac{dp}{dy}\right)$",
+               fontsize=22, fontweight='bold')
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight='bold')
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight='bold')
     legend = ax.legend(loc='best')
-    ax.set_ylim([1e-6,1e0])
+    ax.set_ylim([1e-6, 1e0])
     plt.tight_layout()
     plt.savefig('dpdy_norm.png', format='png')
