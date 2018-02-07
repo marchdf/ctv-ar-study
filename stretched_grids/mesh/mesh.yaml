@@ -1,0 +1,40 @@
+# -*- mode: yaml -*-
+
+nalu_abl_mesh:
+
+  output_db: mesh.exo
+
+  ioss_8bit_ints: no
+
+  spec_type: bounding_box
+
+  vertices:
+    - [0.0, 0.0, 0.0]
+    - [2.0, 2.0, 2.0]
+
+  mesh_dimensions: [200, 200, 200]
+
+  fluid_part_name: interior
+
+  xmin_boundary_name : west
+
+  xmax_boundary_name : east
+
+  ymin_boundary_name : south
+
+  ymax_boundary_name : north
+
+  zmin_boundary_name : top
+
+  zmax_boundary_name : bottom
+
+  x_spacing:
+    spacing_type: constant_spacing
+
+  y_spacing:
+    spacing_type: geometric_stretching
+    stretching_factor: 1.095445
+    bidirectional: true
+
+  z_spacing:
+    spacing_type: constant_spacing
