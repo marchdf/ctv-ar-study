@@ -16,17 +16,14 @@ linear_solvers:
     kspace: 100
     output_level: 0
 
-
   - name: solve_cont
-    type: tpetra
-    method: gmres
-    preconditioner: muelu
+    type: hypre
+    method: hypre_gmres
+    preconditioner: boomerAMG
     tolerance: 1e-5
-    max_iterations: 75
-    kspace: 75
+    max_iterations: 50
+    kspace: 5
     output_level: 0
-    muelu_xml_file_name: ../../muelu.xml
-    recompute_preconditioner: no
 
 realms:
 
