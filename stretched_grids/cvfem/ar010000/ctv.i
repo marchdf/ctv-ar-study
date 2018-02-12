@@ -29,7 +29,7 @@ realms:
 
   - name: realm_1
     mesh: ../../mesh/mesh_512x512_1.exo
-    use_edges: yes
+    use_edges: no
     automatic_decomposition_type: rib
 
     equation_systems:

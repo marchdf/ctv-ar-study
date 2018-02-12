@@ -34,7 +34,7 @@ realms:
 
     equation_systems:
       name: theEqSys
-      max_iterations: 5
+      max_iterations: 2
    
       solver_system_specification:
         pressure: solve_cont
@@ -130,7 +130,7 @@ Time_Integrators:
       name: ti_1
       start_time: 0
       termination_time: 1.0
-      time_step: 0.0000009765625
+      time_step: 0.000001953125
       time_stepping_type: fixed 
       time_step_count: 0
       second_order_accuracy: yes
