@@ -29,8 +29,8 @@ linear_solvers:
 realms:
 
   - name: realm_1
-    mesh: ../../mesh/mesh_512x512_10000.exo
-    use_edges: yes
+    mesh: ../../mesh/mesh_512x512_1.exo
+    use_edges: no
     automatic_decomposition_type: rib
 
     equation_systems:
@@ -104,6 +104,10 @@ realms:
             pressure: no
             velocity: no
 
+        - shifted_gradient_operator:
+            velocity: yes
+            pressure: yes
+
         - consistent_mass_matrix_png:
             pressure: no
 
@@ -131,7 +135,7 @@ Time_Integrators:
       name: ti_1
       start_time: 0
       termination_time: 0.01
-      time_step: 0.0000001953125
+      time_step: 0.001953125
       time_stepping_type: fixed 
       time_step_count: 0
       second_order_accuracy: yes

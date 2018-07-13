@@ -30,7 +30,7 @@ realms:
 
   - name: realm_1
     mesh: ../../mesh/mesh_512x512_10000.exo
-    use_edges: yes
+    use_edges: no
     automatic_decomposition_type: rib
 
     equation_systems:
@@ -103,6 +103,10 @@ realms:
         - limiter:
             pressure: no
             velocity: no
+
+        - shifted_gradient_operator:
+            velocity: yes
+            pressure: yes
 
         - consistent_mass_matrix_png:
             pressure: no

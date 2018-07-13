@@ -1,9 +1,23 @@
 .DS_Store
-*.log
-*.dat
-*.o*
+ctv.log
+ctv.dat
+ctv*.o*
 __pycache__
 *.pdf
 results*
 *.exo
 naluX
+
+# Nek stuff
+obj
+nek5000
+makefile
+*.map
+*.ma2
+*.re2
+*.box
+ctv0.f*
+compiler.out
+.state
+SESSION.NAME
+input_genmap

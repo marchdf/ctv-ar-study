@@ -21,9 +21,10 @@ linear_solvers:
     method: hypre_gmres
     preconditioner: boomerAMG
     tolerance: 1e-5
-    max_iterations: 50
-    kspace: 5
+    max_iterations: 100
+    kspace: 10
     output_level: 0
+    absolute_tolerance: 1.0e-12
 
 realms:
 
@@ -129,7 +130,7 @@ Time_Integrators:
   - StandardTimeIntegrator:
       name: ti_1
       start_time: 0
-      termination_time: 1.0
+      termination_time: 0.01
       time_step: 0.0001953125
       time_stepping_type: fixed 
       time_step_count: 0

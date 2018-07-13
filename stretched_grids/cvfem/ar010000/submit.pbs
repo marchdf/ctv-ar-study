@@ -14,10 +14,11 @@ cd $PBS_O_WORKDIR
 #  Put your job commands after this line
 {
     module purge 
-    module use /nopt/nrel/apps/modules/candidate/modulefiles
-    module load openmpi-gcc/1.10.0-5.2.0
-    module load gcc/5.2.0 
-    module load python/2.7.8
+    module use /nopt/nrel/ecom/ecp/base/modules/gcc-6.2.0
+    module load gcc/6.2.0
+    module load openmpi/1.10.4
+    module load yaml-cpp
+    module load hypre
 } &> /dev/null
 
-mpiexec -np 24 ${HOME}/Nalu/build/naluX -i ctv.i
+mpiexec -np 24 ${HOME}/wind/nalu-wind/build/naluX -i ctv.i

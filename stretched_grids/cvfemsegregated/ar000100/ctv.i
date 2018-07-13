@@ -7,16 +7,7 @@ Simulations:
 
 linear_solvers:
 
-  - name: solve_scalar
-    type: tpetra
-    method: gmres
-    preconditioner: ilut
-    tolerance: 1e-5
-    max_iterations: 300
-    kspace: 100
-    output_level: 0
-
-  - name: solve_cont
+  - name: hypre_solver
     type: hypre
     method: hypre_gmres
     preconditioner: boomerAMG
@@ -25,12 +16,13 @@ linear_solvers:
     kspace: 10
     output_level: 0
     absolute_tolerance: 1.0e-12
+    segregated_solver: yes
 
 realms:
 
   - name: realm_1
-    mesh: ../../mesh/mesh_512x512_10000.exo
-    use_edges: yes
+    mesh: ../../mesh/mesh_512x512_100.exo
+    use_edges: no
     automatic_decomposition_type: rib
 
     equation_systems:
@@ -38,9 +30,9 @@ realms:
       max_iterations: 2
    
       solver_system_specification:
-        pressure: solve_cont
-        velocity: solve_scalar
-        dpdx: solve_scalar
+        pressure: hypre_solver
+        velocity: hypre_solver
+        dpdx: hypre_solver
 
       systems:
         - LowMachEOM:
@@ -131,7 +123,7 @@ Time_Integrators:
       name: ti_1
       start_time: 0
       termination_time: 0.01
-      time_step: 0.0000001953125
+      time_step: 0.00001953125
       time_stepping_type: fixed 
       time_step_count: 0
       second_order_accuracy: yes

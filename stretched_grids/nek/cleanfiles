@@ -1,0 +1,2 @@
+#!/bin/bash
+rm -rf ctv0.* *.dra fort.* *.sch ctv.fld* ctv.o*
