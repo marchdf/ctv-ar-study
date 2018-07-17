@@ -122,7 +122,7 @@ Time_Integrators:
   - StandardTimeIntegrator:
       name: ti_1
       start_time: 0
-      termination_time: 0.01
+      termination_step_count: 50000
       time_step: 0.0000001953125
       time_stepping_type: fixed 
       time_step_count: 0

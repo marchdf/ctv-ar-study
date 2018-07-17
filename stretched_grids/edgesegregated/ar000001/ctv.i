@@ -7,30 +7,7 @@ Simulations:
 
 linear_solvers:
 
-  - name: hypre_mom
-    type: hypre
-    method: hypre_gmres
-    preconditioner: boomerAMG
-    tolerance: 1e-5
-    max_iterations: 100
-    kspace: 10
-    output_level: 0
-    write_matrix_files: off
-    bamg_output_level: 0
-    bamg_coarsen_type: 8
-    bamg_interp_type: 6
-    bamg_cycle_type:  1
-    bamg_relax_type: 3
-    bamg_relax_order: 1
-    bamg_num_sweeps: 2
-    bamg_keep_transpose: 1
-    bamg_max_levels: 1
-    bamg_trunc_factor: 0.1
-    bamg_pmax_elmts: 2
-    bamg_strong_threshold: 0.25
-    absolute_tolerance: 1.0e-12
-
-  - name: hypre_cont
+  - name: hypre_solver
     type: hypre
     method: hypre_gmres
     preconditioner: boomerAMG
@@ -39,12 +16,13 @@ linear_solvers:
     kspace: 10
     output_level: 0
     absolute_tolerance: 1.0e-12
+    segregated_solver: yes
 
 realms:
 
   - name: realm_1
     mesh: ../../mesh/mesh_512x512_1.exo
-    use_edges: no
+    use_edges: yes
     automatic_decomposition_type: rib
 
     equation_systems:
@@ -52,8 +30,9 @@ realms:
       max_iterations: 2
    
       solver_system_specification:
-        pressure: hypre_cont
-        velocity: hypre_mom
+        pressure: hypre_solver
+        velocity: hypre_solver
+        dpdx: hypre_solver
 
       systems:
         - LowMachEOM:

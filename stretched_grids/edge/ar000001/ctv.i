@@ -7,16 +7,30 @@ Simulations:
 
 linear_solvers:
 
-  - name: solve_scalar
-    type: tpetra
-    method: gmres
-    preconditioner: ilut
+  - name: hypre_mom
+    type: hypre
+    method: hypre_gmres
+    preconditioner: boomerAMG
     tolerance: 1e-5
-    max_iterations: 300
-    kspace: 100
+    max_iterations: 100
+    kspace: 10
     output_level: 0
+    write_matrix_files: off
+    bamg_output_level: 0
+    bamg_coarsen_type: 8
+    bamg_interp_type: 6
+    bamg_cycle_type:  1
+    bamg_relax_type: 3
+    bamg_relax_order: 1
+    bamg_num_sweeps: 2
+    bamg_keep_transpose: 1
+    bamg_max_levels: 1
+    bamg_trunc_factor: 0.1
+    bamg_pmax_elmts: 2
+    bamg_strong_threshold: 0.25
+    absolute_tolerance: 1.0e-12
 
-  - name: solve_cont
+  - name: hypre_cont
     type: hypre
     method: hypre_gmres
     preconditioner: boomerAMG
@@ -38,9 +52,8 @@ realms:
       max_iterations: 2
    
       solver_system_specification:
-        pressure: solve_cont
-        velocity: solve_scalar
-        dpdx: solve_scalar
+        pressure: hypre_cont
+        velocity: hypre_mom
 
       systems:
         - LowMachEOM:
@@ -130,7 +143,7 @@ Time_Integrators:
   - StandardTimeIntegrator:
       name: ti_1
       start_time: 0
-      termination_time: 0.01
+      termination_step_count: 5
       time_step: 0.001953125
       time_stepping_type: fixed 
       time_step_count: 0

@@ -10,6 +10,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import netCDF4 as nc
 
 
 # ========================================================================
@@ -47,7 +48,7 @@ dashseq = [
     [3, 3],
     [3, 3],
 ]
-markertype = ["s", "d", "o", "p", "h"]
+markertype = ["s", "d", "o", "p", "h", "^"]
 
 
 # ========================================================================
@@ -76,6 +77,45 @@ def parse_error(fname):
         inplace=True,
     )
     return df
+
+
+# ========================================================================
+def get_aspect_ratio(fname, aspect):
+    "Get the min/max/mean aspect ratio of a mesh"
+
+    # Load the data
+    dat = nc.Dataset(fname)
+
+    # Get coordinates
+    coord = (
+        dat.variables["coordx"][:],
+        dat.variables["coordy"][:],
+        dat.variables["coordz"][:],
+    )
+
+    # Subset on the nodes on the face
+    actual_idx = np.where(coord[2] <= 0.0 + 1e-10)
+    coord = (coord[0][actual_idx], coord[1][actual_idx], coord[2][actual_idx])
+    N = int(np.sqrt(coord[0].shape[0]) - 1)
+    x = coord[0].reshape((N + 1, N + 1))
+    y = coord[1].reshape((N + 1, N + 1))
+
+    # Aspect ratio in each cell
+    ar = np.diff(x, axis=1)[:-1, :] / np.diff(y, axis=0)[:, :-1]
+
+    # plot histogram
+    plt.figure(0)
+    ax = plt.gca()
+    n, bins, patches = plt.hist(ar.flatten(), 100, density=True, facecolor=cmap[0])
+    plt.xlabel(r"aspect ratio", fontsize=22, fontweight="bold")
+    plt.ylabel(r"Frequency", fontsize=22, fontweight="bold")
+    plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
+    plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
+    plt.tight_layout()
+    plt.savefig("hist_ar{0:d}.png".format(aspect), format="png", dpi=300)
+    plt.clf()
+
+    return np.min(ar), np.max(ar), np.mean(ar)
 
 
 # ========================================================================
@@ -111,16 +151,29 @@ if __name__ == "__main__":
 
     # ======================================================================
     # Setup
-    # aspects = [1, 10, 100, 1000, 10000]
-    aspects = [1, 10, 100, 1000]
     fields = ["u", "v", "dpdx", "dpdy"]
     edf = []
+    tfinal = 0.009765625
+
+    # Get min/max/mean aspect ratios
+    aspects = {}
+    mdir = os.path.abspath("mesh")
+    for j, aspect in enumerate([1, 10, 100, 1000, 10000]):
+        mname = os.path.join(mdir, "mesh_512x512_{0:d}.exo".format(aspect))
+        aspects[aspect] = get_aspect_ratio(mname, aspect)
 
     # ======================================================================
     # Load nalu and nek data
-    methods = ["edge", "cvfem", "cvfemshifted", "cvfemsegregated", "nek"]
+    methods = [
+        "edge",
+        "cvfem",
+        "cvfemshifted",
+        "cvfemsegregated",
+        "edgesegregated",
+        "nek",
+    ]
     for i, method in enumerate(methods):
-        for j, aspect in enumerate(aspects):
+        for j, aspect in enumerate(sorted(aspects)):
 
             if method == "nek":
                 ename = os.path.join(method, "ar{0:d}".format(aspect), "error.dat")
@@ -136,14 +189,16 @@ if __name__ == "__main__":
                 df = parse_error(ename)
                 walltime = parse_time_nalu(lname)
 
-            df["Aspect"] = aspect
-            df["Method"] = method
+            df["aspect"] = aspect
+            df["min_aspect"] = aspects[aspect][0]
+            df["max_aspect"] = aspects[aspect][1]
+            df["avg_aspect"] = aspects[aspect][2]
+            df["method"] = method
             df["walltime"] = walltime
             edf.append(df)
 
     # Concatenate all
     edf = pd.concat(edf, ignore_index=True, sort=False)
-    edf["theory"] = edf.Aspect ** 2 * 1e-5
     np.set_printoptions(linewidth=100)
 
     # ======================================================================
@@ -152,13 +207,14 @@ if __name__ == "__main__":
     # Plot field errors
     for i, field in enumerate(fields):
         for j, method in enumerate(methods):
-            subdf = edf[(edf.Field == field) & (edf.Method == method)]
-            gsubdf = subdf.groupby(["Aspect"], sort=False)["Time"].idxmax()
+            subdf = edf[(edf.Field == field) & (edf.method == method)]
+            gsubdf = subdf.groupby(["aspect"], sort=False)["Time"].idxmax()
             subdf = edf.loc[gsubdf.values]
+            subdf.loc[np.fabs(subdf.Time - tfinal) > 1e-5, ["L1", "L2", "Loo"]] = np.nan
 
             plt.figure(i)
             p = plt.loglog(
-                subdf.Aspect,
+                subdf.aspect,
                 subdf.L2,
                 lw=2,
                 color=cmap[j],
@@ -170,13 +226,13 @@ if __name__ == "__main__":
             )
 
     # Plot walltime
-    subdf = edf.drop_duplicates(subset=["Aspect", "Method", "walltime"]).groupby(
-        ["Method"], sort=False
+    subdf = edf.drop_duplicates(subset=["aspect", "method", "walltime"]).groupby(
+        ["method"], sort=False
     )
     for j, (name, group) in enumerate(subdf):
         plt.figure(len(fields) + 1)
         p = plt.loglog(
-            group.Aspect,
+            group.aspect,
             group.walltime,
             lw=2,
             color=cmap[j],
@@ -184,47 +240,47 @@ if __name__ == "__main__":
             mec=cmap[j],
             mfc=cmap[j],
             ms=10,
-            label=group.Method.iloc[0],
+            label=group.method.iloc[0],
         )
 
     # ======================================================================
     # Format plots
     plt.figure(0)
     ax = plt.gca()
-    plt.xlabel(r"aspect ratio", fontsize=22, fontweight="bold")
+    plt.xlabel(r"max aspect ratio", fontsize=22, fontweight="bold")
     plt.ylabel(r"$L_2(u)$", fontsize=22, fontweight="bold")
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
     legend = ax.legend(loc="best")
-    ax.set_ylim([1e-6, 1e1])
+    ax.set_ylim([1e-6, 1e-1])
     plt.tight_layout()
     plt.savefig("u_norm.png", format="png", dpi=300)
 
     plt.figure(1)
     ax = plt.gca()
-    plt.xlabel(r"aspect ratio", fontsize=22, fontweight="bold")
+    plt.xlabel(r"max aspect ratio", fontsize=22, fontweight="bold")
     plt.ylabel(r"$L_2(v)$", fontsize=22, fontweight="bold")
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
     legend = ax.legend(loc="best")
-    ax.set_ylim([1e-6, 1e1])
+    ax.set_ylim([1e-6, 1e-1])
     plt.tight_layout()
     plt.savefig("v_norm.png", format="png", dpi=300)
 
     plt.figure(2)
     ax = plt.gca()
-    plt.xlabel(r"aspect ratio", fontsize=22, fontweight="bold")
+    plt.xlabel(r"max aspect ratio", fontsize=22, fontweight="bold")
     plt.ylabel(r"$L_2\left(\frac{dp}{dx}\right)$", fontsize=22, fontweight="bold")
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
     legend = ax.legend(loc="best")
-    ax.set_ylim([1e-4, 1e0])
+    ax.set_ylim([1e-4, 1e-2])
     plt.tight_layout()
     plt.savefig("dpdx_norm.png", format="png", dpi=300)
 
     plt.figure(3)
     ax = plt.gca()
-    plt.xlabel(r"aspect ratio", fontsize=22, fontweight="bold")
+    plt.xlabel(r"max aspect ratio", fontsize=22, fontweight="bold")
     plt.ylabel(r"$L_2\left(\frac{dp}{dy}\right)$", fontsize=22, fontweight="bold")
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")
@@ -235,7 +291,7 @@ if __name__ == "__main__":
 
     plt.figure(len(fields) + 1)
     ax = plt.gca()
-    plt.xlabel(r"aspect ratio", fontsize=22, fontweight="bold")
+    plt.xlabel(r"max aspect ratio", fontsize=22, fontweight="bold")
     plt.ylabel(r"$t$", fontsize=22, fontweight="bold")
     plt.setp(ax.get_xmajorticklabels(), fontsize=18, fontweight="bold")
     plt.setp(ax.get_ymajorticklabels(), fontsize=18, fontweight="bold")

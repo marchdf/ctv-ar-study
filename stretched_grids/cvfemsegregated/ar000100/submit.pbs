@@ -19,4 +19,4 @@ cd $PBS_O_WORKDIR
     module load openmpi/1.10.4
 } &> /dev/null
 
-mpiexec -np 24 /home/sanantha/exawind/source/nalu-wind/build_dev/naluX -i ctv.i
+mpiexec -np 24 ../../naluX -i ctv.i
